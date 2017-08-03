@@ -242,6 +242,22 @@ class Utils {
             }
         }
     }
+
+    /**
+     *
+     * @param {Map} map
+     * @returns {Array}
+     */
+    static mapToArray(map) {
+        let values = [];
+        let keys = map.keys();
+        let k = keys.next();
+        while (!k.done) {
+            values.push(map.get(k.value))
+        }
+
+        return values;
+    }
 }
 
 class FileStorage {
@@ -819,7 +835,6 @@ DB.ADDRESS_STATEMENT = 'ADDRESS';
 DB.WORD_STATEMENT = 'WORD';
 DB.CONTRACT_STATEMENT = 'CONTRACT';
 
-
 class Networks {}
 Networks.MAINNET = {
     messagePrefix: '\x18Creativecoin Signed Message:\n',
@@ -832,7 +847,121 @@ Networks.MAINNET = {
     wif: 0x80
 };
 
+/**
+ * Created by ander on 28/07/17.
+ */
+
+class WordReference {
+    constructor(word, txHash, date, order) {
+        this.word = word;
+        this.txHash = txHash;
+        this.date = date;
+        this.order = order;
+    }
+}
+
+class SmartAction {
+    constructor(txHash, ntx, addr, date, type, data) {
+        this.txHash = txHash;
+        this.ntx = ntx;
+        this.addr = addr;
+        this.date = date;
+        this.type = type;
+        this.data = data;
+    }
+}
+
+class Content {
+    constructor(autosave = true) {
+        this.wordReferences = {};
+        this.smartActions = {};
+        this.autosave = autosave;
+    }
+
+    /**
+     *
+     * @param {WordReference} wordReference
+     */
+    addWordReference(wordReference) {
+        if (!this.wordReferences[wordReference.word]) {
+            this.wordReferences[wordReference.word] = {};
+        }
+        this.wordReferences[wordReference.word][wordReference.txHash] = wordReference;
+        if (this.autosave) {
+            this.save();
+        }
+    }
+
+    /**
+     *
+     * @param txHash
+     * @param word
+     * @returns {*}
+     */
+    getWordReference(word = null, txHash = null) {
+        if (word && txHash) {
+            if (this.wordReferences[word]) {
+                return this.wordReferences[word][txHash];
+            }
+
+            return undefined;
+        } else if (word) {
+            return this.wordReferences[word];
+        }
+
+        return this.wordReferences;
+    }
+
+    /**
+     *
+     * @param {SmartAction} smartAction
+     */
+    addContract(smartAction) {
+        this.smartActions[smartAction.txHash] = smartAction;
+        if (this.autosave) {
+            this.save();
+        }
+    }
+
+    /**
+     *
+     * @param {string} txHash
+     * @returns {*}
+     */
+    getContract(txHash) {
+        return this.smartActions[txHash];
+    }
+
+    save() {
+        File.write(Constants.CONTENT_PATH, this);
+    }
+
+    /**
+     *
+     * @returns {Content}
+     */
+    static load() {
+        let content = new Content();
+        try {
+            let contentFile = File.read(Constants.CONTENT_PATH);
+            let obj = JSON.parse(contentFile);
+            content.smartActions = obj.smartActions;
+            content.wordReferences = obj.wordReferences;
+        } catch (err) {
+
+        }
+
+        return content;
+    }
+}
+
+class Trantor {
+    constructor() {
+        this.db = new DB(Constants.DATABASE_PATH);
+        this.content = Content.load();
+    }
+}
 if (module) {
-    module.exports = {ErrorCodes, OS, Constants, Utils, FileStorage, Preferences, Configuration, Creativecoin, DB, Networks};
+    module.exports = {ErrorCodes, OS, Constants, Utils, FileStorage, Preferences, Configuration, Creativecoin, DB, Networks, WordReference, SmartAction, Content, Trantor};
 }
 
