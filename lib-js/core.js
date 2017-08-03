@@ -953,7 +953,7 @@ class Content {
     }
 
     save() {
-        File.write(Constants.CONTENT_PATH, this);
+        File.write(Constants.CONTENT_PATH, JSON.stringify(this));
     }
 
     /**

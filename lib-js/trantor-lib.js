@@ -1,4 +1,4 @@
-/* Imports */
+// /* Imports */
 //const fs = require('fs');
 // const HttpsCaller = require('./https-caller');
 //const {app, BrowserWindow} = require('electron');
@@ -179,53 +179,27 @@ function exploreBlocks() {
     console.log("EXPLORING CREA BLOCKS .... SYNC ... please wait ... \n");
     let lastblock;
 
+    NODE.connection.getBlockHash(trantor.content.lastBlock, function (err, lastBlockHash) {
+        NODE.connection.getBlockCount(function (err, count) {
+            if (err) {
+                console.log('Error getting num of blocks', err);
+            } else  {
+                total_blocks = count.result;
 
-    trantor.db.lastExploredBlock(function (err, res) {
-        console.log("Res", err, res);
-        if (res[0] && res[0].blockhash) {
-            NODE.connection.getBlockCount(function (err, count) {
-                if (err) {
-                    console.log('Error getting num of blocks', err);
-                } else  {
-                    total_blocks = count.result;
-
-                    NODE.connection.getBlockHash(total_blocks, function (err, blockHash) {
-                        if (err) {
-                            console.log('Erro getting blockhash', err);
-                        } else {
-                            console.log("Didnt finish last time");
-                            listsinceblock(blockHash.result, res[0].blockhash);//add lastblock['block']
-                        }
-                    });
-                }
-
-            });
-        } else {
-            trantor.db.lastAddrToTx(function(err, row) {
-                let block, blocks;
-                lastblock = row[0];
-                console.log('Lastblock', lastblock);
-
-                NODE.connection.getBlockCount(function(err, count) {
-                    console.log('getBlockCount', err, count);
-                    total_blocks = parseInt(count.result);
-
-                    NODE.connection.getBlockHash(total_blocks, function (err, hash) {
-                        console.log('getBlockHash', err, hash);
-
-                        if (lastblock == undefined) {
-                            listsinceblock(hash.result);
-                            //listsinceblock('1cad01fe4d331803435710b049e0639d1f42cb22a13253aec62478e2c7df326d');
-                        } else {
-                            listsinceblock(hash.result, lastblock['block']);
-                            //listsinceblock('1cad01fe4d331803435710b049e0639d1f42cb22a13253aec62478e2c7df326d');
-                        }
-
-                    });
+                NODE.connection.getBlockHash(total_blocks, function (err, blockHash) {
+                    if (err) {
+                        console.log('Erro getting blockhash', err);
+                    } else {
+                        console.log("Didnt finish last time");
+                        listsinceblock(blockHash.result, lastBlockHash.result);//add lastblock['block']
+                    }
                 });
-            });
-        }
-    });
+            }
+
+        });
+    })
+
+
 }
 trantor.exploreBlocks = exploreBlocks;
 
@@ -448,6 +422,7 @@ function listsinceblock(starthash, lastblock) {
                         trantor.db.run('INSERT INTO lastexplored (blockhash, untilblock, date) VALUES ("'+blockhash+'", "'+lastblock+'", "'+blocktime+'")', _ => {});
                     }
 
+
                     if (parseNextBlock) {
                         listBlock(prevBlock)
                     } else {
@@ -455,6 +430,7 @@ function listsinceblock(starthash, lastblock) {
                         isExploring = false;
                         //trantor.db.all('DELETE FROM lastexplored', _ => {});
                         Preferences.setFirstUseExecuted(true);
+                        trantor.content.lastBlock = block.height;
                         //insertAddr.finalize(_ => {});
                         //insertCtx.finalize(_ => {});
                         //insertWord.finalize(_ => {});
@@ -462,7 +438,7 @@ function listsinceblock(starthash, lastblock) {
                             $('.exploring').remove();
                         }
                     }
-
+                    trantor.content.save();
                 } else {
                     setTimeout(function () {
                         listBlock(starthash);
