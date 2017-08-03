@@ -179,14 +179,17 @@ function exploreBlocks() {
     console.log("EXPLORING CREA BLOCKS .... SYNC ... please wait ... \n");
     let lastblock;
 
-    NODE.connection.getBlockHash(trantor.content.lastBlock, function (err, lastBlockHash) {
-        NODE.connection.getBlockCount(function (err, count) {
-            if (err) {
-                console.log('Error getting num of blocks', err);
-            } else  {
-                total_blocks = count.result;
+    NODE.connection.getBlockCount(function (err, count) {
+        if (err) {
+            console.log('Error getting num of blocks', err);
+        } else {
+            total_blocks = count.result;
+            if (trantor.content.isExploringEnded()) {
+                trantor.content.startBlock = total_blocks;
+            }
 
-                NODE.connection.getBlockHash(total_blocks, function (err, blockHash) {
+            NODE.connection.getBlockHash(trantor.content.lastBlock, function (err, lastBlockHash) {
+                NODE.connection.getBlockHash(trantor.content.startBlock, function (err, blockHash) {
                     if (err) {
                         console.log('Erro getting blockhash', err);
                     } else {
@@ -194,11 +197,9 @@ function exploreBlocks() {
                         listsinceblock(blockHash.result, lastBlockHash.result);//add lastblock['block']
                     }
                 });
-            }
-
-        });
+            })
+        }
     })
-
 
 }
 trantor.exploreBlocks = exploreBlocks;
@@ -322,6 +323,8 @@ function listsinceblock(starthash, lastblock) {
                             <span>Done: ${total_blocks - block.height}/${total_blocks}</span>`);
                     }
 
+                    trantor.content.startBlock = block.height;
+
                     function processTransaction(i) {
                         let tx_id = txs[i];
                         if (typeof $ != 'undefined') {
@@ -430,13 +433,18 @@ function listsinceblock(starthash, lastblock) {
                         isExploring = false;
                         //trantor.db.all('DELETE FROM lastexplored', _ => {});
                         Preferences.setFirstUseExecuted(true);
-                        trantor.content.lastBlock = block.height;
+                        trantor.content.lastBlock = trantor.content.startBlock;
+                        if (total_blocks > trantor.content.startBlock) {
+                            exploreBlocks()
+                        } else {
+                            if (typeof $ != 'undefined') {
+                                $('.exploring').remove();
+                            }
+                        }
                         //insertAddr.finalize(_ => {});
                         //insertCtx.finalize(_ => {});
                         //insertWord.finalize(_ => {});
-                        if (typeof $ != 'undefined') {
-                            $('.exploring').remove();
-                        }
+
                     }
                     trantor.content.save();
                 } else {

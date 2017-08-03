@@ -876,6 +876,7 @@ class Content {
         this.wordReferences = {};
         this.smartActions = {};
         this.lastBlock = 0;
+        this.startBlock = 0;
         this.autosave = autosave;
     }
 
@@ -952,6 +953,14 @@ class Content {
         return this.lastBlock;
     }
 
+    /**
+     *
+     * @returns {boolean}
+     */
+    isExploringEnded() {
+        return this.lastBlock == this.startBlock;
+    }
+
     save() {
         File.write(Constants.CONTENT_PATH, JSON.stringify(this));
     }
@@ -968,6 +977,7 @@ class Content {
             content.smartActions = obj.smartActions;
             content.wordReferences = obj.wordReferences;
             content.lastBlock = obj.lastBlock;
+            content.startBlock = obj.startBlock;
         } catch (err) {
 
         }
