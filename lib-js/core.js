@@ -875,6 +875,7 @@ class Content {
     constructor(autosave = true) {
         this.wordReferences = {};
         this.smartActions = {};
+        this.lastBlock = 0;
         this.autosave = autosave;
     }
 
@@ -932,6 +933,25 @@ class Content {
         return this.smartActions[txHash];
     }
 
+    /**
+     *
+     * @param {Number} lastBlock
+     */
+    setLastBlockExplored(lastBlock) {
+        this.lastBlock = lastBlock;
+        if (this.autosave) {
+            this.save();
+        }
+    }
+
+    /**
+     *
+     * @returns {number|*}
+     */
+    getLastBlockExplored() {
+        return this.lastBlock;
+    }
+
     save() {
         File.write(Constants.CONTENT_PATH, this);
     }
@@ -947,6 +967,7 @@ class Content {
             let obj = JSON.parse(contentFile);
             content.smartActions = obj.smartActions;
             content.wordReferences = obj.wordReferences;
+            content.lastBlock = obj.lastBlock;
         } catch (err) {
 
         }

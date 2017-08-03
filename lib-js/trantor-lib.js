@@ -185,7 +185,7 @@ function exploreBlocks() {
         if (res[0] && res[0].blockhash) {
             NODE.connection.getBlockCount(function (err, count) {
                 if (err) {
-                    console.log('Erro grtting num of blocks', err);
+                    console.log('Error getting num of blocks', err);
                 } else  {
                     total_blocks = count.result;
 
