@@ -3,7 +3,6 @@
  */
 const {app, ipcMain} = require('electron');
 
-const sqlite = require('sqlite3').verbose();
 const request = require('request');
 const fs = require('fs');
 const exec = require('child_process').exec;
@@ -258,6 +257,15 @@ class Utils {
 
         return values;
     }
+
+    /**
+     *
+     * @param obj
+     * @returns {boolean}
+     */
+    static isObject(obj) {
+        return obj === Object(obj);
+    }
 }
 
 class FileStorage {
@@ -316,6 +324,22 @@ class Preferences {
      */
     static isFirstUseExecuted() {
         return FileStorage.getItem('first_use_executed', false);
+    }
+
+    /**
+     *
+     * @returns {*}
+     */
+    static isNodeReindexed() {
+        return FileStorage.getItem('node_reindexed', false);
+    }
+
+    /**
+     *
+     * @param {boolean} reindexed
+     */
+    static setNodeReindexed(reindexed) {
+        FileStorage.setItem('node_reindexed', reindexed);
     }
 
     /**
@@ -614,7 +638,12 @@ class Creativecoin {
      * @param callback
      */
     start(callback) {
-        let startCommand = Constants.CORE_PATH + ' -daemon -txindex' + (Preferences.isFirstUseExecuted() ? ' -reindex-chainstate' : '');
+        let startCommand = Constants.CORE_PATH + ' -daemon -txindex';
+        if (!Preferences.isNodeReindexed()) {
+            startCommand += ' -reindex-chainstate';
+        }
+
+        Preferences.setNodeReindexed(true);
         console.log('Starting', startCommand);
         OS.run(startCommand, callback);
 
@@ -684,12 +713,12 @@ class Creativecoin {
 
 class DB {
     constructor(dbPath) {
-        this.db = new sqlite.Database(dbPath);
+        this.db = {}; //new sqlite.Database(dbPath);
         this.statements = new Map();
     }
 
     init() {
-        this.db.run('CREATE TABLE IF NOT EXISTS "wordToReference" ' +
+/*        this.db.run('CREATE TABLE IF NOT EXISTS "wordToReference" ' +
             '(`wordHash` varchar(255) NOT NULL,`ref` varchar(255) NOT NULL, `blockDate`	timestamp NOT NULL, ' +
             '`order`	integer NOT NULL, PRIMARY KEY(`wordHash`,`ref`,`blockDate`,`order`));');
 
@@ -714,7 +743,7 @@ class DB {
 
         this.db.run('CREATE TABLE IF NOT EXISTS "addrtotx" (`addr` varchar(255) NOT NULL, `tx` varchar(255) NOT NULL, `amount` ' +
             'varchar(255) NOT NULL, `date` varchar(255) NOT NULL, `block` varchar(255) NOT NULL, `vin` INTEGER NOT NULL,' +
-            ' `vout` INTEGER NOT NULL, `n` INTEGER NOT NULL, PRIMARY KEY(`addr`,`tx`,`vout`,`n`));');
+            ' `vout` INTEGER NOT NULL, `n` INTEGER NOT NULL, PRIMARY KEY(`addr`,`tx`,`vout`,`n`));');*/
     }
 
     makeStatements() {
@@ -928,7 +957,7 @@ class Content {
     /**
      *
      * @param {string} txHash
-     * @returns {*}
+     * @returns {SmartAction}
      */
     getContract(txHash) {
         return this.smartActions[txHash];

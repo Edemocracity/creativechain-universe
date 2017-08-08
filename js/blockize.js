@@ -303,15 +303,15 @@ function findWord(findword, page) {
     $('#output').html('');
     $('#loading').show();
 
-    console.log('findWord', findword)
+    console.log('findWord', findword);
     // $.post("https://creativechain.net/api.php", {"action":"findWord", "find": findword, "page": page }, function( data ) {
-    trantor.findWord(findword, page, data => {
-        console.log("WEB data", data);
-        if (data) {
+    trantor.findWord(findword, page, function (references) {
+        console.log("WEB data", references);
+        if (references) {
             // console.log(data);
             var objF = new Object();
             //alert(data);
-            var datos = data;
+            var datos = references;
 
             $.each(datos, function(key, value) {
                 console.log('data');
@@ -329,26 +329,23 @@ function findWord(findword, page) {
                     if (key2 == 'count') {
                         $('#totalresults').html(Math.ceil(value2 / 10));
                     }
-                    if (key2 == 'content') {
-                        console.log("content");
+                    if (key2 == 'data') {
+                        console.log("data");
                         var objdata;
                         try {
                             console.log(value2);
-                            // console.log(JSON.parse(value2));
+
                             objdata = value2
                             if (typeof value2 == 'string') {
                                 objdata = JSON.parse(value2);
                             }
-                            //
-                            // if (isObject(value2)) {
-                            //   //	alert(value2);
-                            // }
-                            //alert(value2);
-                            var obj2 = objdata;
-                            var idunique = '';
+
+
+                            let obj2 = objdata;
+                            let idunique = '';
                             idunique = guid();
 
-                            var template = "";
+                            let template = '';
 
                             if (objdata.contract == "like" || objdata.contract == "unlike" || objdata.contract == "spend" || objdata.contract == "spend" || objdata.contract == "x2x" || objdata.contract == "acceptoffer" || objdata.contract == "multiaddress" || objdata.contract == "sponsor") {
                                 template = "./cblock/show/like.html";
@@ -569,6 +566,10 @@ function findWord(findword, page) {
 
                             $('#loading').hide();
                         }
+                    }
+
+                    if (key2 == 'like') {
+
                     }
 
                 });
