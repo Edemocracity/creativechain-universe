@@ -309,35 +309,34 @@ function findWord(findword, page) {
         console.log("WEB data", references);
         if (references) {
             // console.log(data);
-            var objF = new Object();
+            let objF = {};
             //alert(data);
-            var datos = references;
+            let refKeys = Object.keys(references);
 
-            $.each(datos, function(key, value) {
-                console.log('data');
+            refKeys.forEach(function (key, index, array) {
+                let val = references[key];
+                let kKeys = Object.keys(val);
 
-                var ref = "";
+                let ref = '';
 
-
-                $.each(value, function(key2, value2) {
-                    console.log(key2, value2);
-                    // value2 = JSON.stringify(value2)
-                    if (key2 == 'ref') {
-                        objF[value2] = value2;
-                        ref = value2;
+                kKeys.forEach(function (kKey, i, arr) {
+                    let valData = val[kKey];
+                    if (kKey == 'ref') {
+                        objF[valData] = valData;
+                        ref = valData;
                     }
-                    if (key2 == 'count') {
-                        $('#totalresults').html(Math.ceil(value2 / 10));
+                    if (kKey == 'count') {
+                        $('#totalresults').html(Math.ceil(val[kKey] / 10));
                     }
-                    if (key2 == 'data') {
+                    if (kKey == 'data') {
                         console.log("data");
                         var objdata;
                         try {
-                            console.log(value2);
+                            console.log(valData);
 
-                            objdata = value2
-                            if (typeof value2 == 'string') {
-                                objdata = JSON.parse(value2);
+                            objdata = valData
+                            if (typeof valData == 'string') {
+                                objdata = JSON.parse(valData);
                             }
 
 
@@ -372,16 +371,17 @@ function findWord(findword, page) {
                                     });
                                 });
                                 $("#" + idunique + " .ctx").each(function() {
+
                                     if ($(this).attr("id") == "likebutton") {
-                                        console.log("Like button", value);
+                                        console.log("Like button", val);
                                         $(this).attr({
                                             onClick: 'like(\"' + ref + '\")'
-                                        }).text(value.like || 0)
+                                        }).text(val.like || 0)
                                     }
                                     if ($(this).attr("id") == "unlikebutton") {
                                         $(this).attr({
                                             onClick: 'unlike(\"' + ref + '\")'
-                                        }).text(value.unlike || 0);
+                                        }).text(val.unlike || 0);
                                     }
                                     if ($(this).attr("id") == "smartaction") {
                                         $(this).attr({
@@ -567,11 +567,6 @@ function findWord(findword, page) {
                             $('#loading').hide();
                         }
                     }
-
-                    if (key2 == 'like') {
-
-                    }
-
                 });
             });
 
