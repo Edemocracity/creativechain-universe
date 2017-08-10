@@ -1,4 +1,6 @@
 'use strict';
+
+//WARNING: This script is incomplete. DO NOT USE FOR COMPILE!!
 let builder = require('electron-builder');
 let Platform = builder.Platform;
 let appVersion = '1.0.0';
