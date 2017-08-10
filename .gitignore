@@ -9,3 +9,6 @@ releases
 index.db-journal
 /torrents/*
 content.json
+dist
+yarn-error.log
+yarn.lock

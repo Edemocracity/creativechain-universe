@@ -1,17 +1,21 @@
 {
-  "name": "creative-chain",
+  "name": "Creativechain",
   "version": "1.0.0",
   "description": "^",
+  "author": {
+    "name": "Creativechain",
+    "email":"info@creatrivechain.org"
+  },
+  "email": "info@creativechain.org",
   "main": "main.js",
   "license": "ISC",
   "dependencies": {
     "bitcoin": "^3.0.1",
     "bitcoind-rpc": "^0.7.0",
     "bitcoinjs-lib": "^3.1.0",
+    "combined-stream": "^1.0.5",
     "drag-drop": "^2.13.2",
-    "electron": "^1.4.7",
     "electron-dl": "^1.9.0",
-    "electron-rebuild": "^1.5.7",
     "execsql": "^0.0.3",
     "handbrake-js": "^2.1.0",
     "imagemin": "^5.3.1",
@@ -24,10 +28,36 @@
   },
   "scripts": {
     "start": "electron .",
-    "postinstall": "install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "pack": "build --dir",
+    "dist": "build"
   },
   "devDependencies": {
+    "electron": "^1.4.7",
     "electron-builder": "^17.10.0",
-    "electron-packager": "^8.6.0"
+    "electron-packager": "^8.7.2"
+  },
+  "build": {
+    "appId": "org.creativechain.universe",
+    "productName": "CreativechainUniverse",
+    "artifactName": "",
+    "asar": true,
+    "compression": "normal",
+    "copyright": "Copyright © 2017 Creativechain",
+    "directories": {
+      "buildResources": "./",
+      "output": "./releases",
+      "app": "./"
+    },
+    "buildVersion": "1.0.0",
+    "files": [
+      "!.idea", "!index.db", "!index.db-journal", "!crea-test-db-sql", "!app.conf", "!bin"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   }
 }
